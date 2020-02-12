@@ -6,9 +6,9 @@ API to control LED-wall in the maki
 
 #### Done:
 
-- [x] Set background color by setting redis key bg:r. bg:b, bg:g
+- [x] Set background color by setting redis key `bg:r`. `bg:b` or `bg:g`
 
-#### ToDo:
+#### ToDo/Ideas:
 
 Features:
 - [ ] set "fusleiste" seperately
