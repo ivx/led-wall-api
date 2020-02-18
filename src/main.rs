@@ -1,13 +1,12 @@
 #![feature(proc_macro_hygiene, decl_macro)]
-
+// clippy::all
+// clippy::all
+#[allow(clippy::all)]
 // #[macro_use] extern crate rocket;
-
-use redis;
 use redis::Commands;
 
-use ggez;
-
 use ggez::{
+    conf::FullscreenType,
     event,
     event::{KeyCode, KeyMods},
     graphics,
@@ -20,6 +19,7 @@ const APP_NAME: &str = "led-wall";
 
 struct MainState {
     frames: usize,
+    stop: bool,
     color: graphics::Color,
     con: redis::Connection,
 }
@@ -28,30 +28,58 @@ impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let color = [0.1, 0.2, 0.3, 1.0].into();
         let client = redis::Client::open("redis://127.0.0.1/").unwrap();
-        let con =  client.get_connection().unwrap();
+        let con = client.get_connection().unwrap();
 
         Ok(MainState {
             frames: 0,
+            stop: false,
             color,
             con,
         })
     }
 
-    // fn strobe_colors(&mut self) {
-    //     match self.frames % 6 {
-    //         0 => self.color = [1.0, 0.0, 0.0, 1.0].into(),
-    //         2 => self.color = [0.0, 1.0, 0.0, 1.0].into(),
-    //         4 => self.color = [0.0, 0.0, 1.0, 1.0].into(),
-    //         _ => (),
-    //     }
-    // }
+    fn strobe_colors(&mut self) {
+        match self.frames % 6 {
+            0 => self.color = [1.0, 0.0, 0.0, 1.0].into(),
+            2 => self.color = [0.0, 1.0, 0.0, 1.0].into(),
+            4 => self.color = [0.0, 0.0, 1.0, 1.0].into(),
+            _ => (),
+        }
+    }
 
     fn read_color_from_redis(&mut self) {
-        let (r, g, b) : (String, String, String) = self.con.get(&["bg:r", "bg:b", "bg:b"]).unwrap();
+        let result = self.con.get(&[
+            "background:color:red",
+            "background:color:green",
+            "background:color:blue",
+        ]);
 
-        let (red, green, blue) = (r.parse::<f32>().unwrap(), g.parse::<f32>().unwrap(), b.parse::<f32>().unwrap());
+        // if result.is_ok() {
+        //     let (r, g, b): (u8, u8, u8) = result.unwrap();
+        //     self.color = (r, g, b, 0).into();
+        // }
 
-        self.color = [red, green, blue, 1.0].into();
+        if let Ok(res) = result {
+            let (r, g, b): (u8, u8, u8) = res;
+            self.color = (r, g, b, 0).into();
+        }
+
+        // let result = self.con.hgetall("rect");
+
+        // if result.is_ok() {
+        //     let map: HashMap<String, i32> = result.unwrap();
+
+        //     let to_find =
+        //         ["x", "y", "width", "height"];
+        //     println!("{:?}", map);
+
+        //     for &field in &to_find {
+        //         match map.get(field) {
+        //             Some(value) => println!("{}: {}", field, value),
+        //             None => println!("{} is unreviewed.", field),
+        //         }
+        //     }
+        // }
     }
 
     fn update_frames(&mut self, ctx: &mut Context) {
@@ -68,9 +96,12 @@ impl event::EventHandler for MainState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        if self.stop {
+            event::quit(ctx);
+        }
         self.update_frames(ctx);
         self.read_color_from_redis();
-        // self.strobe_colors();
+        self.strobe_colors();
 
         graphics::clear(ctx, self.color);
 
@@ -90,6 +121,7 @@ impl event::EventHandler for MainState {
             KeyCode::R => self.color = [1.0, 0.0, 0.0, 1.0].into(),
             KeyCode::G => self.color = [0.0, 1.0, 0.0, 1.0].into(),
             KeyCode::B => self.color = [0.0, 0.0, 1.0, 1.0].into(),
+            KeyCode::Q => self.stop = true,
             _ => (),
         }
     }
@@ -103,10 +135,20 @@ pub fn main() -> GameResult {
                 .vsync(false),
         )
         .window_mode(
-            ggez::conf::WindowMode::default()
-                // .dimensions(600.0, 600.0)
-                .borderless(true)
-                .resizable(true),
+            ggez::conf::WindowMode {
+                width: 800.0,
+                height: 600.0,
+                maximized: true,
+                fullscreen_type: FullscreenType::Windowed,
+                borderless: true,
+                min_width: 0.0,
+                max_width: 0.0,
+                min_height: 0.0,
+                max_height: 0.0,
+                resizable: false,
+            }
+            .borderless(true)
+            .resizable(true),
         )
         .build()?;
 

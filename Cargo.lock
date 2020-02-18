@@ -1182,6 +1182,7 @@ dependencies = [
  "ggez",
  "redis",
  "rocket",
+ "rosc",
  "tokio",
 ]
 
@@ -2154,6 +2155,15 @@ dependencies = [
  "lewton",
  "minimp3",
  "nalgebra",
+]
+
+[[package]]
+name = "rosc"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0a6261c06ead0b8191098af35de11dafd910e4f28391a2a0c5778aa1eb13161"
+dependencies = [
+ "byteorder",
 ]
 
 [[package]]
