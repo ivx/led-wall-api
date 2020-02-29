@@ -6,18 +6,14 @@ API to control LED-wall in the maki
 
 #### Done:
 
-- [x] Set background color by setting redis key `bg:r`. `bg:b` or `bg:g`
+- [x] Renderer which reads color from redis key `background:color:red`...
+- [x] OCS API which set's redis keys when ocs calls are made
 
 #### ToDo/Ideas:
 
 Features:
-- [ ] set "fusleiste" seperately
+- [ ] set "fusleiste" and other areas seperately
 - [ ] set pixels explicitly
-- [ ] draw shapes???? (circels which get bigger would be awesome for sound visualization stuff)
-
-APIs:
-- [ ] API which integrates with SonicPi & to the redis (maybe as seperate repo, i somewhat like redis as minimal API)
-- [ ] (maybe) REST/HTTP API
-- [ ] (maybe) Websocket?????
+- [ ] draw shapes/animations???? (change brightness/size of shapes)
 
 
