@@ -1,8 +1,5 @@
 #![feature(proc_macro_hygiene, decl_macro)]
-// clippy::all
-// clippy::all
 #[allow(clippy::all)]
-// #[macro_use] extern crate rocket;
 use redis::Commands;
 
 use ggez::{
