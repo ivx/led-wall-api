@@ -16,4 +16,7 @@ Features:
 - [ ] set pixels explicitly
 - [ ] draw shapes/animations???? (change brightness/size of shapes)
 
+## Deployment
 
+- Install rust on raspberry pi https://www.rust-lang.org/tools/install
+- Install deps - `apt-get install libasound-dev libudev-dev libudev1 librust-libudev-sys-dev`
