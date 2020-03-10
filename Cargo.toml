@@ -9,6 +9,6 @@ edition = "2018"
 [dependencies]
 ggez = "0.5"
 redis = "0.15.1"
-rocket = "0.4.2"
-tokio = { version = "0.2.11", features = ["full"] }
+# rocket = "0.4.2"
+# tokio = { version = "0.2.11", features = ["full"] }
 rosc = "~0.3"
