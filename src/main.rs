@@ -6,9 +6,7 @@ use ggez::{
     conf::FullscreenType,
     event,
     event::{KeyCode, KeyMods},
-    graphics,
-    Context,
-    GameResult,
+    graphics, Context, GameResult,
 };
 //--------------------------------------------
 
@@ -19,6 +17,7 @@ struct MainState {
     stop: bool,
     color: graphics::Color,
     con: redis::Connection,
+    debug_rect: graphics::Rect,
 }
 
 impl MainState {
@@ -27,11 +26,14 @@ impl MainState {
         let client = redis::Client::open("redis://127.0.0.1/").unwrap();
         let con = client.get_connection().unwrap();
 
+        let debug_rect = graphics::Rect::new_i32(0, 0, 0, 0);
+
         Ok(MainState {
             frames: 0,
             stop: false,
             color,
             con,
+            debug_rect,
         })
     }
 
@@ -61,7 +63,7 @@ impl MainState {
             self.color = (r, g, b, 0).into();
         }
 
-        // let result = self.con.hgetall("rect");
+        // let result = self.con.hgetall("debug_rect");
 
         // if result.is_ok() {
         //     let map: HashMap<String, i32> = result.unwrap();
@@ -77,6 +79,25 @@ impl MainState {
         //         }
         //     }
         // }
+    }
+
+    fn draw_debug_rect(&mut self, ctx: &mut Context) -> GameResult {
+        let rect_color = [1.0, 0.33, 0.23, 1.0].into();
+
+        println!("{:?}", self.debug_rect);
+
+        let debug_rect = graphics::Mesh::new_rectangle(
+            ctx,
+            graphics::DrawMode::fill(),
+            self.debug_rect,
+            rect_color,
+        )?;
+
+        graphics::draw(
+            ctx,
+            &debug_rect,
+            (ggez::mint::Point2 { x: 0.0, y: 0.0 },),
+        )
     }
 
     fn update_frames(&mut self, ctx: &mut Context) {
@@ -98,9 +119,11 @@ impl event::EventHandler for MainState {
         }
         self.update_frames(ctx);
         self.read_color_from_redis();
-        self.strobe_colors();
+        // self.strobe_colors();
 
         graphics::clear(ctx, self.color);
+
+        self.draw_debug_rect(ctx)?;
 
         graphics::present(ctx)?;
 
@@ -115,10 +138,22 @@ impl event::EventHandler for MainState {
         _repeat: bool,
     ) {
         match keycode {
+            KeyCode::W => self.debug_rect.y -= 1.0,
+            KeyCode::A => self.debug_rect.x -= 1.0,
+            KeyCode::S => self.debug_rect.y += 1.0,
+            KeyCode::D => self.debug_rect.x += 1.0,
+            KeyCode::Q => {
+                self.debug_rect.w += 1.0;
+                self.debug_rect.h += 1.0;
+            }
+            KeyCode::E => {
+                self.debug_rect.w -= 1.0;
+                self.debug_rect.h -= 1.0;
+            }
             KeyCode::R => self.color = [1.0, 0.0, 0.0, 1.0].into(),
             KeyCode::G => self.color = [0.0, 1.0, 0.0, 1.0].into(),
             KeyCode::B => self.color = [0.0, 0.0, 1.0, 1.0].into(),
-            KeyCode::Q => self.stop = true,
+            KeyCode::Escape => self.stop = true,
             _ => (),
         }
     }
@@ -127,7 +162,7 @@ impl event::EventHandler for MainState {
 pub fn main() -> GameResult {
     let (ctx, event_loop) = &mut ggez::ContextBuilder::new(APP_NAME, "ggez")
         // .backend(ggez::conf::Backend::OpenGLES{major: 3, minor: 0})
-        .backend(ggez::conf::Backend::OpenGL{major: 3, minor: 2})
+        .backend(ggez::conf::Backend::OpenGL { major: 3, minor: 2 })
         .window_setup(
             ggez::conf::WindowSetup::default()
                 .title(APP_NAME)
@@ -135,7 +170,7 @@ pub fn main() -> GameResult {
         )
         .window_mode(
             ggez::conf::WindowMode {
-                width: 800.0,
+                width: 600.0,
                 height: 600.0,
                 maximized: true,
                 fullscreen_type: FullscreenType::Windowed,

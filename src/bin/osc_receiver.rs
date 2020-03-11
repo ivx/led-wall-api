@@ -36,17 +36,21 @@ fn main() {
 
                 con.set::<&str, u8, ()>("background:color:red", 0).unwrap();
                 con.set::<&str, u8, ()>("background:color:blue", 0).unwrap();
-                con.set::<&str, u8, ()>("background:color:green", 0).unwrap();
+                con.set::<&str, u8, ()>("background:color:green", 0)
+                    .unwrap();
 
                 match addr.as_ref() {
                     "/color/blue" => {
-                        con.set::<&str, u8, ()>("background:color:blue", 200).unwrap();
+                        con.set::<&str, u8, ()>("background:color:blue", 200)
+                            .unwrap();
                     }
                     "/color/red" => {
-                        con.set::<&str, u8, ()>("background:color:red", 200).unwrap();
+                        con.set::<&str, u8, ()>("background:color:red", 200)
+                            .unwrap();
                     }
                     "/color/green" => {
-                        con.set::<&str, u8, ()>("background:color:green", 200).unwrap();
+                        con.set::<&str, u8, ()>("background:color:green", 200)
+                            .unwrap();
                     }
                     e => println!("{}", e),
                 }
