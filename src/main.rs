@@ -170,8 +170,10 @@ pub fn main() -> GameResult {
         )
         .window_mode(
             ggez::conf::WindowMode {
-                width: 600.0,
-                height: 600.0,
+                width: 1920.0,
+                height: 1080.0,
+                // width: 600.0,
+                // height: 600.0,
                 maximized: true,
                 fullscreen_type: FullscreenType::Windowed,
                 borderless: true,
@@ -179,7 +181,7 @@ pub fn main() -> GameResult {
                 max_width: 0.0,
                 min_height: 0.0,
                 max_height: 0.0,
-                resizable: false,
+                resizable: true,
             }
             .borderless(true)
             .resizable(true),
