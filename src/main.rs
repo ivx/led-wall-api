@@ -190,7 +190,7 @@ pub fn main() -> GameResult {
                 // width: 600.0,
                 // height: 600.0,
                 maximized: true,
-                fullscreen_type: FullscreenType::Fullscreen,
+                fullscreen_type: FullscreenType::True,
                 borderless: true,
                 min_width: 0.0,
                 max_width: 0.0,
