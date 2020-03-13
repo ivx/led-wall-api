@@ -4,8 +4,8 @@
 function restart_app {
     pkill led-wall-api
     pkill osc_receiver
-    cargo run --bin osc_receiver 0.0.0.0:1234 &
-    cargo run --bin led-wall-api &
+    cargo run --bin osc_receiver 0.0.0.0:1234 > receiver.log &
+    cargo run --bin led-wall-api > led-wall-api.log &
 }
 
 function get_latest_commit {
@@ -16,9 +16,9 @@ COMMIT="$(get_latest_commit)"
 
 while true; do
   while [[ $COMMIT = "$(get_latest_commit)" ]]; do
-      echo "pulling"
-      git pull
-      sleep 2
+      echo "."
+      git pull $1 > /dev/null
+      sleep 2 $1 > /dev/null
   done
   COMMIT="$(get_latest_commit)"
 
