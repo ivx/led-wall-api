@@ -15,9 +15,15 @@ use ggez::{
 };
 //--------------------------------------------
 
+struct WallArea {
+    color: graphics::Color,
+    rect: graphics::Rect,
+}
+
 const APP_NAME: &str = "led-wall";
 
 struct MainState {
+    areas: [WallArea; 2],
     frames: usize,
     stop: bool,
     color: graphics::Color,
@@ -31,8 +37,19 @@ impl MainState {
         let client = redis::Client::open("redis://127.0.0.1/").unwrap();
         let con = client.get_connection().unwrap();
         let debug_rect = graphics::Rect::new_i32(0, 0, 0, 0);
+        let wall_areas = [
+            WallArea {
+                color: [1.0, 1.0, 1.0, 1.0].into(),
+                rect: graphics::Rect::new_i32(150, 130, 450, 1),
+            },
+            WallArea {
+                color: [1.0, 1.0, 1.0, 1.0].into(),
+                rect: graphics::Rect::new_i32(150, 166, 354, 1),
+            },
+        ];
 
         Ok(MainState {
+            areas: wall_areas,
             frames: 0,
             stop: false,
             color,
@@ -52,15 +69,36 @@ impl MainState {
 
     fn read_color_from_redis(&mut self) {
         let result = self.con.get(&[
+            "area0:color:red",
+            "area0:color:green",
+            "area0:color:blue",
+        ]);
+        if let Ok(res) = result {
+            println!("readcolor");
+            let (r, g, b): (u8, u8, u8) = res;
+            self.areas[0].color = (r, g, b, 255).into();
+
+            println!("{:?}", self.areas[0].color);
+        }
+
+        let result = self.con.get(&[
+            "area1:color:red",
+            "area1:color:green",
+            "area1:color:blue",
+        ]);
+        if let Ok(res) = result {
+            println!("readcolor");
+            let (r, g, b): (u8, u8, u8) = res;
+            self.areas[1].color = (r, g, b, 255).into();
+
+            println!("{:?}", self.areas[0].color);
+        }
+
+        let result = self.con.get(&[
             "background:color:red",
             "background:color:green",
             "background:color:blue",
         ]);
-
-        // if result.is_ok() {
-        //     let (r, g, b): (u8, u8, u8) = result.unwrap();
-        //     self.color = (r, g, b, 0).into();
-        // }
 
         if let Ok(res) = result {
             let (r, g, b): (u8, u8, u8) = res;
@@ -78,19 +116,48 @@ impl MainState {
             for &field in &to_find {
                 match map.get(field) {
                     Some(value) => {
-                        println!("{}: {}", field, value);
+                        // println!("{}: {}", field, value);
                         match field {
                             "x" => self.debug_rect.x = *value,
                             "y" => self.debug_rect.y = *value,
                             "width" => self.debug_rect.w = *value,
                             "height" => self.debug_rect.h = *value,
-                            _ => ()
+                            _ => (),
                         }
                     }
-                    None => println!("{} is unset.", field),
+                    None => (),
+                    // println!("{} is unset.", field),
                 }
             }
         }
+    }
+
+    fn draw_area_rect(&mut self, ctx: &mut Context) -> GameResult {
+        let debug_rect = graphics::Mesh::new_rectangle(
+            ctx,
+            graphics::DrawMode::fill(),
+            self.areas[0].rect,
+            self.areas[0].color,
+        )?;
+
+        graphics::draw(
+            ctx,
+            &debug_rect,
+            (ggez::mint::Point2 { x: 0.0, y: 0.0 },),
+        )?;
+
+        let debug_rect = graphics::Mesh::new_rectangle(
+            ctx,
+            graphics::DrawMode::fill(),
+            self.areas[1].rect,
+            self.areas[1].color,
+        )?;
+
+        graphics::draw(
+            ctx,
+            &debug_rect,
+            (ggez::mint::Point2 { x: 0.0, y: 0.0 },),
+        )
     }
 
     fn draw_debug_rect(&mut self, ctx: &mut Context) -> GameResult {
@@ -133,7 +200,8 @@ impl event::EventHandler for MainState {
 
         graphics::clear(ctx, self.color);
 
-        self.draw_debug_rect(ctx)?;
+        // self.draw_debug_rect(ctx)?;
+        self.draw_area_rect(ctx)?;
 
         graphics::present(ctx)?;
 

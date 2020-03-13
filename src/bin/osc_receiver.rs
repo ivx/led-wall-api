@@ -1,6 +1,9 @@
 #[allow(clippy::all)]
 extern crate rosc;
 
+// use rand::{thread_rng, Rng};
+use rand::prelude::*;
+
 use rosc::OscPacket;
 use std::env;
 use std::net::{SocketAddrV4, UdpSocket};
@@ -39,7 +42,33 @@ fn main() {
                 con.set::<&str, u8, ()>("background:color:green", 0)
                     .unwrap();
 
+                println!("packet");
                 match addr.as_ref() {
+                    "/area/0" => {
+                        con.set::<&str, u8, ()>("area0:color:red", random())
+                            .unwrap();
+                        let asd: u8 = random();
+                        println!("{}", asd);
+
+                        con.set::<&str, u8, ()>("area0:color:green", random())
+                            .unwrap();
+
+                        con.set::<&str, u8, ()>("area0:color:blue", random())
+                            .unwrap();
+                    }
+                    "/area/1" => {
+                        con.set::<&str, u8, ()>("area1:color:red", random())
+                            .unwrap();
+                        let asd: u8 = random();
+                        println!("{}", asd);
+
+                        con.set::<&str, u8, ()>("area1:color:green", random())
+                            .unwrap();
+
+                        con.set::<&str, u8, ()>("area1:color:blue", random())
+                            .unwrap();
+                    }
+
                     "/color/blue" => {
                         con.set::<&str, u8, ()>("background:color:blue", 200)
                             .unwrap();
@@ -71,6 +100,8 @@ fn handle_packet(packet: OscPacket) -> String {
             // let test = format!("{}", msg.addr);
             // let asd = String::from(&msg.args);
             // return test;
+
+            println!("msg");
             msg.addr
         }
         OscPacket::Bundle(bundle) => {
