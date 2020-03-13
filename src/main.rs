@@ -161,8 +161,8 @@ impl event::EventHandler for MainState {
 
 pub fn main() -> GameResult {
     let (ctx, event_loop) = &mut ggez::ContextBuilder::new(APP_NAME, "ggez")
-        // .backend(ggez::conf::Backend::OpenGLES{major: 3, minor: 0})
-        .backend(ggez::conf::Backend::OpenGL { major: 3, minor: 2 })
+        .backend(ggez::conf::Backend::OpenGLES{major: 3, minor: 1})
+        // .backend(ggez::conf::Backend::OpenGL { major: 3, minor: 2 })
         .window_setup(
             ggez::conf::WindowSetup::default()
                 .title(APP_NAME)
