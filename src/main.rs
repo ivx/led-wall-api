@@ -1,12 +1,17 @@
 // #![feature(proc_macro_hygiene, decl_macro)]
 #[allow(clippy::all)]
 use redis::Commands;
+// use redis::PubSub;
+
+use std::collections::HashMap;
 
 use ggez::{
     conf::FullscreenType,
     event,
     event::{KeyCode, KeyMods},
-    graphics, Context, GameResult,
+    graphics,
+    Context,
+    GameResult,
 };
 //--------------------------------------------
 
@@ -25,7 +30,6 @@ impl MainState {
         let color = [0.1, 0.2, 0.3, 1.0].into();
         let client = redis::Client::open("redis://127.0.0.1/").unwrap();
         let con = client.get_connection().unwrap();
-
         let debug_rect = graphics::Rect::new_i32(0, 0, 0, 0);
 
         Ok(MainState {
@@ -63,28 +67,34 @@ impl MainState {
             self.color = (r, g, b, 0).into();
         }
 
-        // let result = self.con.hgetall("debug_rect");
+        let result = self.con.hgetall("debug_rect");
 
-        // if result.is_ok() {
-        //     let map: HashMap<String, i32> = result.unwrap();
+        if result.is_ok() {
+            let map: HashMap<String, f32> = result.unwrap();
 
-        //     let to_find =
-        //         ["x", "y", "width", "height"];
-        //     println!("{:?}", map);
+            let to_find = ["x", "y", "width", "height"];
+            println!("{:?}", map);
 
-        //     for &field in &to_find {
-        //         match map.get(field) {
-        //             Some(value) => println!("{}: {}", field, value),
-        //             None => println!("{} is unreviewed.", field),
-        //         }
-        //     }
-        // }
+            for &field in &to_find {
+                match map.get(field) {
+                    Some(value) => {
+                        println!("{}: {}", field, value);
+                        match field {
+                            "x" => self.debug_rect.x = *value,
+                            "y" => self.debug_rect.y = *value,
+                            "width" => self.debug_rect.w = *value,
+                            "height" => self.debug_rect.h = *value,
+                            _ => ()
+                        }
+                    }
+                    None => println!("{} is unset.", field),
+                }
+            }
+        }
     }
 
     fn draw_debug_rect(&mut self, ctx: &mut Context) -> GameResult {
         let rect_color = [1.0, 0.33, 0.23, 1.0].into();
-
-        println!("{:?}", self.debug_rect);
 
         let debug_rect = graphics::Mesh::new_rectangle(
             ctx,
@@ -139,9 +149,14 @@ impl event::EventHandler for MainState {
     ) {
         match keycode {
             KeyCode::W => self.debug_rect.y -= 1.0,
+            KeyCode::Up => self.debug_rect.y -= 5.0,
             KeyCode::A => self.debug_rect.x -= 1.0,
+            KeyCode::Left => self.debug_rect.x -= 5.0,
             KeyCode::S => self.debug_rect.y += 1.0,
+            KeyCode::Down => self.debug_rect.y += 5.0,
             KeyCode::D => self.debug_rect.x += 1.0,
+            KeyCode::Right => self.debug_rect.x += 5.0,
+            KeyCode::C => println!("{:?}", self.debug_rect),
             KeyCode::Q => {
                 self.debug_rect.w += 1.0;
                 self.debug_rect.h += 1.0;
@@ -161,7 +176,7 @@ impl event::EventHandler for MainState {
 
 pub fn main() -> GameResult {
     let (ctx, event_loop) = &mut ggez::ContextBuilder::new(APP_NAME, "ggez")
-        .backend(ggez::conf::Backend::OpenGLES{major: 3, minor: 1})
+        .backend(ggez::conf::Backend::OpenGLES { major: 3, minor: 1 })
         // .backend(ggez::conf::Backend::OpenGL { major: 3, minor: 2 })
         .window_setup(
             ggez::conf::WindowSetup::default()
