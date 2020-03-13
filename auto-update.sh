@@ -13,12 +13,13 @@ function get_latest_commit {
 }
 
 COMMIT="$(get_latest_commit)"
+restart_app
 
 while true; do
   while [[ $COMMIT = "$(get_latest_commit)" ]]; do
       echo "."
       git pull $1 > /dev/null
-      sleep 2 $1 > /dev/null
+      sleep 5 $1 > /dev/null
   done
   COMMIT="$(get_latest_commit)"
 
